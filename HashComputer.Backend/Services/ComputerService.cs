@@ -24,13 +24,28 @@ namespace HashComputer.Backend.Services
 			};
 
 			string fileName = parameters.HashFileName ?? ComputeParameters.DEFAULT_HASH_FILENAME;
+			string filePath = $"{parameters.Path.Trim('/')}/{fileName}.json";
+
+			string diffText = string.Empty;
+			if (File.Exists(filePath))
+			{
+				var prevJson = JsonConvert.DeserializeObject<ComputedHashJson>(await File.ReadAllTextAsync(filePath));
+				StringBuilder sb = new StringBuilder();
+                foreach (var pair in prevJson.ComputedHashes)
+                {
+					if (computedHashJson.ComputedHashes.ContainsKey(pair.Key) && computedHashJson.ComputedHashes[pair.Key] == pair.Value)
+						continue;
+					sb.AppendLine(pair.Key);
+				}
+				diffText = sb.ToString();
+			}
 
 			string data = JsonConvert.SerializeObject(computedHashJson);
-			await File.WriteAllTextAsync($"{parameters.Path.Trim('/')}/{fileName}.json", data);
+			await File.WriteAllTextAsync(filePath, data);
 
 			onProgressChanged?.Invoke(100, string.Empty);
 
-			return (true, string.Empty);
+			return (true, diffText);
 		}
 
 		/// <summary>

@@ -41,6 +41,9 @@ namespace HashComputer
 			IsDoneVisible = result.Item1;
 			IsFailureVisible = !result.Item1;
 			ErrorText = result.Item2;
+			DiffText = result.Item2;
+
+			IsDiffTextVisible = !string.IsNullOrWhiteSpace(result.Item2) && result.Item1;
 
 			IsProgressVisible = false;
 			IsComputeButtonEnabled = true;
@@ -69,5 +72,10 @@ namespace HashComputer
 		public bool IsFailureVisible { get; set; }
 		[Notify]
 		public string ErrorText { get; set; }
+
+		[Notify]
+		public bool IsDiffTextVisible { get; set; }
+		[Notify]
+		public string DiffText { get; set; }
 	}
 }
