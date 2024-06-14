@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Controls.Primitives;
 using Avalonia.Markup.Xaml;
+using HashComputer.Backend.Services;
 using Hypocrite.Core.Interfaces;
 using Hypocrite.Core.Interfaces.Presentation;
 using Hypocrite.Core.Logging.Interfaces;
@@ -46,6 +47,8 @@ namespace HashComputer
 			containerRegistry.RegisterInstance<ILoggingService>(new Log4netLoggingService(Path.Combine(logFileFolder, logFileName)));
 			containerRegistry.RegisterSingleton<IViewModelResolverService, ViewModelResolverService>();
 			containerRegistry.RegisterSingleton<IWindowProgressService, WindowProgressService>();
+
+			containerRegistry.RegisterSingleton<IComputerService, ComputerService>();
 
 			containerRegistry.RegisterSingleton<IBaseWindow, MainWindow>();
 		}

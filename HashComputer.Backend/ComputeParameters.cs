@@ -6,13 +6,14 @@
 	public class ComputeParameters
 	{
 		public const string DEFAULT_HASH_FILENAME = "computed_hash";
+		public const string DEFAULT_VERSION = "1.0.0";
 
 		/// <summary>
 		/// Path to the folder where the hash should be computed
 		/// </summary>
 		public string Path { get; set; }
 		/// <summary>
-		/// The version of the files. If <see cref="null"/> then the version is not included
+		/// The version of the files. If <see cref="null"/> then the version is <see cref="DEFAULT_VERSION"/>
 		/// </summary>
 		public string Version { get; set; }
 		/// <summary>
