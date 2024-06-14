@@ -7,20 +7,28 @@ namespace HashComputer.Backend.Services
 {
 	public class ComputerService : IComputerService
 	{
-		public async Task<(bool, string)> ComputeHash(ComputeParameters parameters)
+		public async Task<(bool, string)> ComputeHash(ComputeParameters parameters, Action<int, string> onProgressChanged = null)
 		{
+			if (string.IsNullOrWhiteSpace(parameters.Path))
+				return (false, "Path was empty");
+
+			if (!Directory.Exists(parameters.Path))
+				return (false, "Directory does not exist or there is a typo in it");
+
 			parameters.Path = parameters.Path.Replace("\\", "/");
 
 			ComputedHashJson computedHashJson = new ComputedHashJson()
 			{
 				Version = parameters.Version ?? ComputeParameters.DEFAULT_VERSION,
-				ComputedHashes = await GetFileHashMappings(parameters.Path),
+				ComputedHashes = await GetFileHashMappings(parameters.Path, onProgressChanged),
 			};
 
 			string fileName = parameters.HashFileName ?? ComputeParameters.DEFAULT_HASH_FILENAME;
 
 			string data = JsonConvert.SerializeObject(computedHashJson);
 			await File.WriteAllTextAsync($"{parameters.Path.Trim('/')}/{fileName}.json", data);
+
+			onProgressChanged?.Invoke(100, string.Empty);
 
 			return (true, string.Empty);
 		}
@@ -30,7 +38,7 @@ namespace HashComputer.Backend.Services
 		/// </summary>
 		/// <param name="folderPath">The folder path</param>
 		/// <returns>File names</returns>
-		private IEnumerable<string> GetAllFiles(string folderPath)
+		private string[] GetAllFiles(string folderPath)
 		{
 			return Directory.GetFiles(folderPath, "*", SearchOption.AllDirectories);
 		}
@@ -73,13 +81,19 @@ namespace HashComputer.Backend.Services
 		/// Generates file name - file hash mappings
 		/// </summary>
 		/// <param name="folderPath">Path to the folder with files</param>
+		/// <param name="onProgressChanged">Called when progress changed</param>
 		/// <returns>Mappings</returns>
-		private async Task<Dictionary<string, string>> GetFileHashMappings(string folderPath)
+		private async Task<Dictionary<string, string>> GetFileHashMappings(string folderPath, Action<int, string> onProgressChanged = null)
 		{
 			Dictionary<string, string> result = new Dictionary<string, string>();
-			foreach (var file in GetAllFiles(folderPath))
+			var allFiles = GetAllFiles(folderPath);
+			var len = allFiles.Length;
+			for (int i = 0; i < len; ++i)
 			{
-				string normalized = file.Replace("\\", "/");
+				string normalized = allFiles[i].Replace("\\", "/");
+
+				onProgressChanged?.Invoke((int)(i / (float)len * 100), normalized);
+				
 				string fileHash = await GetFileHash(normalized);
 				string lowerName = GetLowerFileName(folderPath, normalized);
 				result.Add(lowerName, fileHash);

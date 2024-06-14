@@ -3,8 +3,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-		Width="400"
-		Height="200"
+		Width="440"
+		Height="280"
         x:Class="HashComputer.MainWindow"
         Title="HashComputer"
 		x:CompileBindings="False">
@@ -18,9 +18,48 @@
 					 MaxWidth="500"
 					 TextWrapping="Wrap"/>
 			
-			<Button Content="Compute"
-					Margin="0,16,0,0"
-					Command="{Binding ComputeHashCommand}"/>
+			<ProgressBar Margin="0,16,0,0"
+						 Minimum="0"
+						 Maximum="100"
+						 Value="{Binding CurrentProgress}"
+						 Height="10"
+						 IsVisible="{Binding IsProgressVisible}"/>
+
+			<StackPanel Orientation="Horizontal"
+						Margin="0,16,0,0">
+				<Button Content="Compute"
+						Command="{Binding ComputeHashCommand}"
+						IsEnabled="{Binding IsComputeButtonEnabled}"/>
+				
+				<TextBlock Text="Done"
+						   VerticalAlignment="Center"
+						   Margin="16,0"
+						   Foreground="Green"
+						   FontWeight="Bold"
+						   IsVisible="{Binding IsDoneVisible}"/>
+				<TextBlock Text="Failure"
+						   VerticalAlignment="Center"
+						   Margin="16,0"
+						   Foreground="Red"
+						   FontWeight="Bold"
+						   IsVisible="{Binding IsFailureVisible}"/>
+			</StackPanel>
+			
+			<TextBlock Text="{Binding ErrorText}"
+					   IsVisible="{Binding IsFailureVisible}"
+					   Margin="0,16,0,0"
+					   TextWrapping="Wrap"
+					   MaxWidth="300"
+					   Foreground="DarkRed"/>
+
+			<TextBlock Text="Current file:"
+					   Margin="0,16,0,0"
+					   IsVisible="{Binding IsProgressVisible}"/>
+			<TextBlock Text="{Binding CurrentFile}"
+					   TextWrapping="Wrap"
+					   MaxWidth="300"
+					   Margin="0,6,0,0"
+					   IsVisible="{Binding IsProgressVisible}"/>
 		</StackPanel>
 	</Grid>
 </Window>
