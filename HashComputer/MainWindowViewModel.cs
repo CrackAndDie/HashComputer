@@ -21,7 +21,9 @@ namespace HashComputer
 			IsFailureVisible = false;
 
 			IsProgressVisible = true;
-			IsComputeButtonEnabled = false;
+			IsInteractionEnabled = false;
+
+			DiffText = string.Empty; // reset
 
 			var result = await ComputerService.ComputeHash(
 				new Backend.ComputeParameters()
@@ -40,13 +42,18 @@ namespace HashComputer
 
 			IsDoneVisible = result.Item1;
 			IsFailureVisible = !result.Item1;
-			ErrorText = result.Item2;
-			DiffText = result.Item2;
 
-			IsDiffTextVisible = !string.IsNullOrWhiteSpace(result.Item2) && result.Item1;
+			bool isDiffTextVisible = !string.IsNullOrWhiteSpace(result.Item2) && result.Item1;
+
+			// if done correctly and not empty - Item2 is diff 
+			if (isDiffTextVisible)
+				DiffText = "There was already a hash file. Here are the files that changed or not presented yet:\n";
+			else if (IsDoneVisible)
+				DiffText = "Done!"; // just write "Done" on success
+			DiffText += result.Item2;
 
 			IsProgressVisible = false;
-			IsComputeButtonEnabled = true;
+			IsInteractionEnabled = true;
 		}
 
 		[Injection]
@@ -57,7 +64,7 @@ namespace HashComputer
 		[Notify]
 		public ICommand ComputeHashCommand { get; set; }
 		[Notify]
-		public bool IsComputeButtonEnabled { get; set; } = true;
+		public bool IsInteractionEnabled { get; set; } = true;
 
 		[Notify]
 		public int CurrentProgress { get; set; }
@@ -70,11 +77,6 @@ namespace HashComputer
 		public bool IsDoneVisible { get; set; }
 		[Notify]
 		public bool IsFailureVisible { get; set; }
-		[Notify]
-		public string ErrorText { get; set; }
-
-		[Notify]
-		public bool IsDiffTextVisible { get; set; }
 		[Notify]
 		public string DiffText { get; set; }
 	}

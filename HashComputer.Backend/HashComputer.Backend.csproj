@@ -3,7 +3,26 @@
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
+		<AssemblyName>HashComputer</AssemblyName>
+
+		<PackageId>HashComputer</PackageId>
+		<Authors>crackanddie</Authors>
+		<Product>HashComputer</Product>
+		<PackageDescription>A backend for generating hash for files</PackageDescription>
+		<Copyright>Copyright © 2024</Copyright>
+		<PackageTags>Hash SHA512 Files</PackageTags>
+		<PackageVersion>1.0.6</PackageVersion>
+		<PackageProjectUrl>https://github.com/CrackAndDie/HashComputer</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/CrackAndDie/HashComputer</RepositoryUrl>
+		<PackageIconUrl>https://raw.githubusercontent.com/CADindustries/container/main/logos/hasher.png</PackageIconUrl>
+		<PackageReadmeFile>NUGET_README.md</PackageReadmeFile>
+		<PackageLicenseFile>NUGET_LICENSE.txt</PackageLicenseFile>
 	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="NUGET_README.md" Pack="true" PackagePath="\" />
+		<None Include="NUGET_LICENSE.txt" Pack="true" PackagePath="\" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
