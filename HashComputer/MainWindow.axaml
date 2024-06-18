@@ -7,13 +7,14 @@
 		Height="280"
         x:Class="HashComputer.MainWindow"
         Title="HashComputer"
-		x:CompileBindings="False">
-	<Grid RowDefinitions="Auto,*,30"
+		x:CompileBindings="False"
+		Icon="/icon.ico">
+	<Grid RowDefinitions="Auto,*,Auto"
 		  Margin="10,6,10,0">
 		<StackPanel Grid.Row="0">
 			<TextBlock Text="Folder path"/>
 
-			<Grid ColumnDefinitions="*, Auto, Auto">
+			<Grid ColumnDefinitions="*, Auto, Auto, Auto">
 				<TextBox Text="{Binding FolderPath, Mode=TwoWay}"
 						 TextWrapping="Wrap"
 						 IsReadOnly="{Binding !IsInteractionEnabled}"/>
@@ -24,15 +25,21 @@
 						Command="{Binding ComputeHashCommand}"
 						IsEnabled="{Binding IsInteractionEnabled}"/>
 
+				<Button Content="Cancel"
+						Grid.Column="2"
+						Margin="10,0,0,0"
+						Command="{Binding CancelCommand}"
+						IsVisible="{Binding IsProgressVisible}"/>
+
 				<TextBlock Text="Done"
-						   Grid.Column="2"
+						   Grid.Column="3"
 						   VerticalAlignment="Center"
 						   Margin="10,0,0,0"
 						   Foreground="Green"
 						   FontWeight="Bold"
 						   IsVisible="{Binding IsDoneVisible}"/>
 				<TextBlock Text="Failure"
-						   Grid.Column="2"
+						   Grid.Column="3"
 						   VerticalAlignment="Center"
 						   Margin="10,0,0,0"
 						   Foreground="Red"
@@ -51,19 +58,38 @@
 
 		<TextBox IsReadOnly="True"
 				 Grid.Row="1"
-				 Margin="0,10,0,0"
+				 Margin="0,10,0,6"
 				 Text="{Binding DiffText}"
 				 TextWrapping="Wrap"
 				 ScrollViewer.VerticalScrollBarVisibility="Auto"/>
 
 		<StackPanel Grid.Row="2"
 					Background="LightGray"
-					Orientation="Horizontal"
-					VerticalAlignment="Center">
-			<TextBlock Text="Current file: "
-					   IsVisible="{Binding IsProgressVisible}"/>
-			<TextBlock Text="{Binding CurrentFile}"
-					   IsVisible="{Binding IsProgressVisible}"/>
+					Margin="0,0,0,6">
+			<StackPanel Orientation="Horizontal">
+				<TextBlock Text="Thread 1: "
+						   IsVisible="{Binding IsProgressVisible}"/>
+				<TextBlock Text="{Binding CurrentFile1}"
+						   IsVisible="{Binding IsProgressVisible}"/>
+			</StackPanel>
+			<StackPanel Orientation="Horizontal">
+				<TextBlock Text="Thread 2: "
+						   IsVisible="{Binding IsProgressVisible}"/>
+				<TextBlock Text="{Binding CurrentFile2}"
+						   IsVisible="{Binding IsProgressVisible}"/>
+			</StackPanel>
+			<StackPanel Orientation="Horizontal">
+				<TextBlock Text="Thread 3: "
+						   IsVisible="{Binding IsProgressVisible}"/>
+				<TextBlock Text="{Binding CurrentFile3}"
+						   IsVisible="{Binding IsProgressVisible}"/>
+			</StackPanel>
+			<StackPanel Orientation="Horizontal">
+				<TextBlock Text="Thread 4: "
+						   IsVisible="{Binding IsProgressVisible}"/>
+				<TextBlock Text="{Binding CurrentFile4}"
+						   IsVisible="{Binding IsProgressVisible}"/>
+			</StackPanel>
 		</StackPanel>
 	</Grid>
 </Window>

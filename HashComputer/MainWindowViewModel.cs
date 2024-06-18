@@ -4,6 +4,7 @@ using Hypocrite.Core.Container;
 using Hypocrite.Core.Mvvm.Attributes;
 using Hypocrite.Mvvm;
 using Prism.Commands;
+using System.Threading;
 using System.Windows.Input;
 
 namespace HashComputer
@@ -13,6 +14,7 @@ namespace HashComputer
 		public MainWindowViewModel()
 		{
 			ComputeHashCommand = new DelegateCommand(OnComputeHashCommand);
+			CancelCommand = new DelegateCommand(OnCancelCommand);
 		}
 
 		private async void OnComputeHashCommand()
@@ -25,19 +27,28 @@ namespace HashComputer
 
 			DiffText = string.Empty; // reset
 
+			_currentCancellationToken = new CancellationTokenSource();
 			var result = await ComputerService.ComputeHash(
 				new Backend.ComputeParameters()
 				{
 					Path = FolderPath,
 				}, 
-				(val, filename) =>
+				(val) =>
 				{
 					Dispatcher.UIThread.Invoke(() =>
 					{
-						CurrentProgress = val;
-						CurrentFile = filename;
+						CurrentProgress = val.Progress;
+						switch (val.ThreadNumber)
+						{
+							// TODO: as listview
+							case 1: CurrentFile1 = val.Message; break;
+							case 2: CurrentFile2 = val.Message; break;
+							case 3: CurrentFile3 = val.Message; break;
+							case 4: CurrentFile4 = val.Message; break;
+						}
 					});
-				}
+				},
+				_currentCancellationToken.Token
 			);
 
 			IsDoneVisible = result.Item1;
@@ -56,6 +67,13 @@ namespace HashComputer
 			IsInteractionEnabled = true;
 		}
 
+		private void OnCancelCommand()
+		{
+			_currentCancellationToken?.Cancel();
+		}
+
+		private CancellationTokenSource _currentCancellationToken;
+
 		[Injection]
 		IComputerService ComputerService { get; set; }
 
@@ -64,12 +82,20 @@ namespace HashComputer
 		[Notify]
 		public ICommand ComputeHashCommand { get; set; }
 		[Notify]
+		public ICommand CancelCommand { get; set; }
+		[Notify]
 		public bool IsInteractionEnabled { get; set; } = true;
 
 		[Notify]
 		public int CurrentProgress { get; set; }
 		[Notify]
-		public string CurrentFile { get; set; }
+		public string CurrentFile1 { get; set; }
+		[Notify]
+		public string CurrentFile2 { get; set; }
+		[Notify]
+		public string CurrentFile3 { get; set; }
+		[Notify]
+		public string CurrentFile4 { get; set; }
 		[Notify]
 		public bool IsProgressVisible { get; set; }
 

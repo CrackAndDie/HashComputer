@@ -11,7 +11,7 @@ namespace HashComputer.Backend.Services
 		/// <param name="onProgressChanged">Called when progress changed (in percents)</param>
 		/// <returns><see cref="true"/> - on success generation overwise - <see cref="false"/>. 
 		/// The second parameter is used to describe the failure or the files diff on success.</returns>
-		Task<(bool, string)> ComputeHash(ComputeParameters parameters, Action<int, string> onProgressChanged = null);
+		Task<(bool, string)> ComputeHash(ComputeParameters parameters, Action<ProgressChangedArgs> onProgressChanged = null, CancellationToken cancellationToken = default);
 
 		/// <summary>
 		/// Computes hash
@@ -20,6 +20,6 @@ namespace HashComputer.Backend.Services
 		/// <param name="onProgressChanged">Called when progress changed (in percents)</param>
 		/// <returns><see cref="true"/> - on success generation overwise - <see cref="false"/>. 
 		/// The second parameter is used to describe the failure or the files diff on success.</returns>
-		Task<ComputedHashJson> ComputeHashPure(ComputeParameters parameters, Action<int, string> onProgressChanged = null);
+		Task<ComputedHashJson> ComputeHashPure(ComputeParameters parameters, Action<ProgressChangedArgs> onProgressChanged = null, CancellationToken cancellationToken = default);
 	}
 }

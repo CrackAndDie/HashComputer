@@ -1,5 +1,7 @@
 ﻿using HashComputer.Backend.Entities;
 using Newtonsoft.Json;
+using System.Collections.Concurrent;
+using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -8,7 +10,7 @@ namespace HashComputer.Backend.Services
 	public class ComputerService : IComputerService
 	{
 		/// <inheritdoc/>
-		public async Task<(bool, string)> ComputeHash(ComputeParameters parameters, Action<int, string> onProgressChanged = null)
+		public async Task<(bool, string)> ComputeHash(ComputeParameters parameters, Action<ProgressChangedArgs> onProgressChanged = null, CancellationToken cancellationToken = default)
 		{
 			try
 			{
@@ -18,7 +20,7 @@ namespace HashComputer.Backend.Services
 				if (!Directory.Exists(parameters.Path))
 					return (false, "Directory does not exist or there is a typo in it");
 
-				var computedHashJson = await ComputeHashPure(parameters, onProgressChanged);
+				var computedHashJson = await ComputeHashPure(parameters, onProgressChanged, cancellationToken);
 
 				string fileName = parameters.HashFileName ?? ComputeParameters.DEFAULT_HASH_FILENAME;
 				string filePath = $"{parameters.Path.Trim('/')}/{fileName}.json";
@@ -38,9 +40,14 @@ namespace HashComputer.Backend.Services
 				}
 
 				string data = JsonConvert.SerializeObject(computedHashJson);
-				await File.WriteAllTextAsync(filePath, data);
+				await File.WriteAllTextAsync(filePath, data, cancellationToken);
 
-				onProgressChanged?.Invoke(100, string.Empty);
+				onProgressChanged?.Invoke(new ProgressChangedArgs()
+				{
+					Progress = 100,
+					ThreadNumber = 0,
+					Message = string.Empty,
+				});
 
 				return (true, diffText);
 			}
@@ -51,14 +58,17 @@ namespace HashComputer.Backend.Services
 		}
 
 		/// <inheritdoc/>
-		public async Task<ComputedHashJson> ComputeHashPure(ComputeParameters parameters, Action<int, string> onProgressChanged = null)
+		public async Task<ComputedHashJson> ComputeHashPure(ComputeParameters parameters, Action<ProgressChangedArgs> onProgressChanged = null, CancellationToken cancellationToken = default)
 		{
 			parameters.Path = parameters.Path.Replace("\\", "/");
+
+			var data = await GetFileHashMappings(parameters.Path, onProgressChanged, cancellationToken);
 
 			ComputedHashJson computedHashJson = new ComputedHashJson()
 			{
 				Version = parameters.Version ?? ComputeParameters.DEFAULT_VERSION,
-				ComputedHashes = await GetFileHashMappings(parameters.Path, onProgressChanged),
+				ComputedHashes = data.Item1,
+				TotalSize = data.Item2,
 			};
 			return computedHashJson;
 		}
@@ -68,9 +78,10 @@ namespace HashComputer.Backend.Services
 		/// </summary>
 		/// <param name="folderPath">The folder path</param>
 		/// <returns>File names</returns>
-		private string[] GetAllFiles(string folderPath)
+		private IEnumerable<string> GetAllFiles(string folderPath)
 		{
-			return Directory.GetFiles(folderPath, "*", SearchOption.AllDirectories);
+			//return Directory.GetFiles(folderPath, "*", SearchOption.AllDirectories);
+			return Directory.EnumerateFiles(folderPath, "*", SearchOption.AllDirectories);
 		}
 
 		/// <summary>
@@ -78,11 +89,11 @@ namespace HashComputer.Backend.Services
 		/// </summary>
 		/// <param name="filePath">The file name</param>
 		/// <returns>Computed hash</returns>
-		private async Task<string> GetFileHash(string filePath)
+		private async Task<string> GetFileHash(string filePath, CancellationToken cancellationToken = default)
 		{
 			using FileStream stream = File.OpenRead(filePath);
 			using SHA512 sha = SHA512.Create();
-			byte[] hash = await sha.ComputeHashAsync(stream);
+			byte[] hash = await sha.ComputeHashAsync(stream, cancellationToken);
 			return BitConverter.ToString(hash).Replace("-", String.Empty);
 		}
 
@@ -113,22 +124,65 @@ namespace HashComputer.Backend.Services
 		/// <param name="folderPath">Path to the folder with files</param>
 		/// <param name="onProgressChanged">Called when progress changed</param>
 		/// <returns>Mappings</returns>
-		private async Task<Dictionary<string, string>> GetFileHashMappings(string folderPath, Action<int, string> onProgressChanged = null)
+		private async Task<(Dictionary<string, string>, ulong)> GetFileHashMappings(string folderPath, Action<ProgressChangedArgs> onProgressChanged = null, CancellationToken cancellationToken = default)
 		{
+			ulong totalSize = 0;
 			Dictionary<string, string> result = new Dictionary<string, string>();
-			var allFiles = GetAllFiles(folderPath);
-			var len = allFiles.Length;
-			for (int i = 0; i < len; ++i)
-			{
-				string normalized = allFiles[i].Replace("\\", "/");
+			object resultLock = new object();
 
-				onProgressChanged?.Invoke((int)(i / (float)len * 100), normalized);
-				
-				string fileHash = await GetFileHash(normalized);
-				string lowerName = GetLowerFileName(folderPath, normalized);
-				result.Add(lowerName, fileHash);
+			var allFiles = GetAllFiles(folderPath);
+			var filesQueue = new ConcurrentQueue<string>(allFiles);
+
+			var len = await Task.Run<int>(() => { return allFiles.Count(); });
+
+			int currentFileIndex = 0;
+			object currentFileIndexLock = new object();
+
+			List<Task> tasksToAwait = new List<Task>();
+			// 4 is an amount of tasks TODO: make it as parameter
+			for (int i = 0; i < 4; ++i)
+			{
+				tasksToAwait.Add(FileProcessor(i + 1, cancellationToken));
 			}
-			return result;
+
+			await Task.WhenAll(tasksToAwait);
+
+			return (result, totalSize);
+
+			Task FileProcessor(int number, CancellationToken cancellationToken = default)
+			{
+				return Task.Run(async () =>
+				{
+					while (filesQueue.TryDequeue(out var file))
+					{
+						if (cancellationToken.IsCancellationRequested)
+							break;
+
+						string normalized = file.Replace("\\", "/");
+						string lowerName = GetLowerFileName(folderPath, normalized);
+
+						lock (currentFileIndexLock)
+						{
+							currentFileIndex++;
+							onProgressChanged?.Invoke(new ProgressChangedArgs()
+							{
+								Progress = (int)(currentFileIndex / (float)len * 100),
+								ThreadNumber = number,
+								Message = lowerName,
+							});
+						}
+						
+						string fileHash = await GetFileHash(normalized, cancellationToken);
+						var fileSize = new System.IO.FileInfo(normalized).Length;
+
+						lock (resultLock)
+						{
+							result.Add(lowerName, fileHash);
+							totalSize += (ulong)fileSize;
+						}
+					}
+				});
+			}
 		}
 	}
 }

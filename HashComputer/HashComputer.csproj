@@ -7,7 +7,18 @@
 		<AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
 
 		<AssemblyName>HashComputer.Frontend</AssemblyName>
+
+		<ApplicationIcon>icon.ico</ApplicationIcon>
 	</PropertyGroup>
+	<ItemGroup>
+	  <None Remove="hasher.png" />
+	</ItemGroup>
+	<ItemGroup>
+	  <AvaloniaResource Include="hasher.png" />
+	</ItemGroup>
+	<ItemGroup>
+	  <AvaloniaResource Include="icon.ico" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Avalonia" Version="11.0.5" />
