@@ -30,9 +30,9 @@ namespace HashComputer.Backend.Services
 				{
 					var prevJson = JsonConvert.DeserializeObject<ComputedHashJson>(await File.ReadAllTextAsync(filePath));
 					StringBuilder sb = new StringBuilder();
-					foreach (var pair in prevJson.ComputedHashes)
+					foreach (var pair in computedHashJson.ComputedHashes)
 					{
-						if (computedHashJson.ComputedHashes.ContainsKey(pair.Key) && computedHashJson.ComputedHashes[pair.Key] == pair.Value)
+						if (prevJson.ComputedHashes.ContainsKey(pair.Key) && prevJson.ComputedHashes[pair.Key] == pair.Value)
 							continue;
 						sb.AppendLine(pair.Key);
 					}

@@ -32,6 +32,7 @@ namespace HashComputer
 				new Backend.ComputeParameters()
 				{
 					Path = FolderPath,
+					Version = VersionText,
 				}, 
 				(val) =>
 				{
@@ -79,6 +80,8 @@ namespace HashComputer
 
 		[Notify]
 		public string FolderPath { get; set; }
+		[Notify]
+		public string VersionText { get; set; } = "1.0.0";
 		[Notify]
 		public ICommand ComputeHashCommand { get; set; }
 		[Notify]
