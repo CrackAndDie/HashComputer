@@ -1,4 +1,5 @@
 ﻿using Avalonia;
+using Avalonia.Dialogs;
 using System;
 
 namespace HashComputer
@@ -16,7 +17,14 @@ namespace HashComputer
 		public static AppBuilder BuildAvaloniaApp()
 			=> AppBuilder.Configure<App>()
 				.UsePlatformDetect()
-				.WithInterFont()
+				.With(new X11PlatformOptions
+				{
+					EnableMultiTouch = true,
+					UseDBusMenu = true
+				})
+				.With(new Win32PlatformOptions())
+				.UseSkia()
+				.UseManagedSystemDialogs()
 				.LogToTrace();
 	}
 }
