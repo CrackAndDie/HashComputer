@@ -42,5 +42,6 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\HashComputer.Backend\HashComputer.Backend.csproj" />
+	  <ProjectReference Include="..\HashComputer.Cli\HashComputer.Cli.csproj" />
 	</ItemGroup>
 </Project>
