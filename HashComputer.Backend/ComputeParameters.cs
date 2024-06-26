@@ -7,6 +7,7 @@
 	{
 		public const string DEFAULT_HASH_FILENAME = "computed_hash";
 		public const string DEFAULT_VERSION = "1.0.0";
+		public const int DEFAULT_TASK_NUMBER = 4;
 
 		/// <summary>
 		/// Path to the folder where the hash should be computed
@@ -20,5 +21,10 @@
 		/// The filename to use for the output hash file. If <see cref="null"/> then <see cref="DEFAULT_HASH_FILENAME"/> is used
 		/// </summary>
 		public string HashFileName { get; set; }
+
+		/// <summary>
+		/// Task amount used to calc hash
+		/// </summary>
+		public int TaskNumber { get; set; }
 	}
 }

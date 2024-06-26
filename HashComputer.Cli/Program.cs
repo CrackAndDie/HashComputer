@@ -1,4 +1,5 @@
 ﻿using CommandLine;
+using HashComputer.Backend;
 using HashComputer.Backend.Entities;
 using HashComputer.Backend.Services;
 
@@ -31,12 +32,15 @@ namespace HashComputer.Cli
 
 			var computerService = new ComputerService();
 			_currentCancellationToken = new CancellationTokenSource();
+			_currentTaskAmount = options.TaskAmount;
 
 			var result = await computerService.ComputeHash(
 				new Backend.ComputeParameters()
 				{
 					Path = options.CheckDir,
 					Version = options.Version,
+					TaskNumber = options.TaskAmount,
+					HashFileName = options.OutDir,
 				},
 				OnProgressChanged,
 				_currentCancellationToken.Token
@@ -54,17 +58,12 @@ namespace HashComputer.Cli
 		private static void OnProgressChanged(ProgressChangedArgs args)
 		{
 			UpdateTextOnLine(0, args.Progress.ToString() + "%");
-			switch (args.ThreadNumber)
+			if (args.ThreadNumber > 0)
 			{
-				// TODO: multi shite
-				case 1: UpdateTextOnLine(1, "Thread 1: " + args.Message); break;
-				case 2: UpdateTextOnLine(2, "Thread 2: " + args.Message); break;
-				case 3: UpdateTextOnLine(3, "Thread 3: " + args.Message); break;
-				case 4: UpdateTextOnLine(4, "Thread 4: " + args.Message); break;
+				UpdateTextOnLine(args.ThreadNumber, $"Task {args.ThreadNumber}: {args.Message}");
 			}
 		}
 
-		// 0 - perc, 1-4 - curr files
 		private static void UpdateTextOnLine(int lineNumber, string text)
 		{
 			Console.SetCursorPosition(_startCursorPos.Item1, _startCursorPos.Item2 + lineNumber);
@@ -78,7 +77,6 @@ namespace HashComputer.Cli
 				text = text + new String(' ', Console.BufferWidth - text.Length);
 			}
 			Console.WriteLine(text);
-			Thread.Sleep(10);
 		}
 
 		private static void OnCancelCommand(object sender, ConsoleCancelEventArgs args)
@@ -89,7 +87,8 @@ namespace HashComputer.Cli
 
 		private static void OnExit(bool properly)
 		{
-			for (int i = 0; i < 5; ++i)
+			// + 1 is for percents
+			for (int i = 0; i < _currentTaskAmount + 1; ++i)
 			{
 				Console.SetCursorPosition(_startCursorPos.Item1, _startCursorPos.Item2 + i);
 				Console.Write(new String(' ', Console.BufferWidth));
@@ -98,6 +97,7 @@ namespace HashComputer.Cli
 			Console.WriteLine(properly ? "Done..." : "Error...");
 		}
 
+		private static int _currentTaskAmount = ComputeParameters.DEFAULT_TASK_NUMBER;
 		private static CancellationTokenSource _currentCancellationToken;
 		private static (int, int) _startCursorPos;
 	}

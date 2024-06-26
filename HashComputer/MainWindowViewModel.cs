@@ -1,9 +1,13 @@
 ﻿using Avalonia.Threading;
+using HashComputer.Backend;
 using HashComputer.Backend.Services;
 using Hypocrite.Core.Container;
 using Hypocrite.Core.Mvvm.Attributes;
 using Hypocrite.Mvvm;
 using Prism.Commands;
+using System;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading;
 using System.Windows.Input;
 
@@ -19,34 +23,33 @@ namespace HashComputer
 
 		private async void OnComputeHashCommand()
 		{
+			var parameters = new Backend.ComputeParameters()
+			{
+				Path = FolderPath,
+				Version = VersionText,
+				TaskNumber = TaskNumber,
+			};
+
 			IsDoneVisible = false;
 			IsFailureVisible = false;
 
 			IsProgressVisible = true;
 			IsInteractionEnabled = false;
 
+			lock (_currentFilesLock)
+				CurrentFiles.AddRange(Enumerable.Repeat("", parameters.TaskNumber));
+
 			DiffText = string.Empty; // reset
 
 			_currentCancellationToken = new CancellationTokenSource();
 			var result = await ComputerService.ComputeHash(
-				new Backend.ComputeParameters()
-				{
-					Path = FolderPath,
-					Version = VersionText,
-				}, 
+				parameters,
 				(val) =>
 				{
 					Dispatcher.UIThread.Invoke(() =>
 					{
 						CurrentProgress = val.Progress;
-						switch (val.ThreadNumber)
-						{
-							// TODO: as listview
-							case 1: CurrentFile1 = val.Message; break;
-							case 2: CurrentFile2 = val.Message; break;
-							case 3: CurrentFile3 = val.Message; break;
-							case 4: CurrentFile4 = val.Message; break;
-						}
+						UpdateCurrentFileStatus(val.ThreadNumber, val.Message);
 					});
 				},
 				_currentCancellationToken.Token
@@ -66,6 +69,17 @@ namespace HashComputer
 
 			IsProgressVisible = false;
 			IsInteractionEnabled = true;
+			lock (_currentFilesLock)
+				CurrentFiles.Clear();
+		}
+
+		private void UpdateCurrentFileStatus(int num, string message)
+		{
+			lock (_currentFilesLock)
+			{
+				if (CurrentFiles.Count > 0 && num > 0)
+					CurrentFiles[num - 1] = $"Task {num}: {message}";			
+			}
 		}
 
 		private void OnCancelCommand()
@@ -81,7 +95,12 @@ namespace HashComputer
 		[Notify]
 		public string FolderPath { get; set; }
 		[Notify]
-		public string VersionText { get; set; } = "1.0.0";
+		public string VersionText { get; set; } = ComputeParameters.DEFAULT_VERSION;
+		[Notify]
+		public int TaskNumber { get; set; } = ComputeParameters.DEFAULT_TASK_NUMBER;
+		[Notify]
+		public string OutFileName { get; set; } = ComputeParameters.DEFAULT_HASH_FILENAME;
+
 		[Notify]
 		public ICommand ComputeHashCommand { get; set; }
 		[Notify]
@@ -92,14 +111,6 @@ namespace HashComputer
 		[Notify]
 		public int CurrentProgress { get; set; }
 		[Notify]
-		public string CurrentFile1 { get; set; }
-		[Notify]
-		public string CurrentFile2 { get; set; }
-		[Notify]
-		public string CurrentFile3 { get; set; }
-		[Notify]
-		public string CurrentFile4 { get; set; }
-		[Notify]
 		public bool IsProgressVisible { get; set; }
 
 		[Notify]
@@ -108,5 +119,8 @@ namespace HashComputer
 		public bool IsFailureVisible { get; set; }
 		[Notify]
 		public string DiffText { get; set; }
+
+		private object _currentFilesLock = new object();
+		public ObservableCollection<string> CurrentFiles { get; set; } = new ObservableCollection<string>();
 	}
 }

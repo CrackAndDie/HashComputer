@@ -62,7 +62,8 @@ namespace HashComputer.Backend.Services
 		{
 			parameters.Path = parameters.Path.Replace("\\", "/");
 
-			var data = await GetFileHashMappings(parameters.Path, onProgressChanged, cancellationToken);
+			int taskNumber = parameters.TaskNumber <= 0 ? ComputeParameters.DEFAULT_TASK_NUMBER : parameters.TaskNumber;
+			var data = await GetFileHashMappings(parameters.Path, taskNumber, onProgressChanged, cancellationToken);
 
 			ComputedHashJson computedHashJson = new ComputedHashJson()
 			{
@@ -124,7 +125,7 @@ namespace HashComputer.Backend.Services
 		/// <param name="folderPath">Path to the folder with files</param>
 		/// <param name="onProgressChanged">Called when progress changed</param>
 		/// <returns>Mappings</returns>
-		private async Task<(Dictionary<string, string>, ulong)> GetFileHashMappings(string folderPath, Action<ProgressChangedArgs> onProgressChanged = null, CancellationToken cancellationToken = default)
+		private async Task<(Dictionary<string, string>, ulong)> GetFileHashMappings(string folderPath, int taskNumber, Action<ProgressChangedArgs> onProgressChanged = null, CancellationToken cancellationToken = default)
 		{
 			ulong totalSize = 0;
 			Dictionary<string, string> result = new Dictionary<string, string>();
@@ -139,8 +140,8 @@ namespace HashComputer.Backend.Services
 			object currentFileIndexLock = new object();
 
 			List<Task> tasksToAwait = new List<Task>();
-			// 4 is an amount of tasks TODO: make it as parameter
-			for (int i = 0; i < 4; ++i)
+			// an amount of tasks 
+			for (int i = 0; i < taskNumber; ++i)
 			{
 				tasksToAwait.Add(FileProcessor(i + 1, cancellationToken));
 			}
@@ -180,6 +181,15 @@ namespace HashComputer.Backend.Services
 							result.Add(lowerName, fileHash);
 							totalSize += (ulong)fileSize;
 						}
+					}
+					lock (currentFileIndexLock)
+					{
+						onProgressChanged?.Invoke(new ProgressChangedArgs()
+						{
+							Progress = (int)(currentFileIndex / (float)len * 100),
+							ThreadNumber = number,
+							Message = string.Empty,
+						});
 					}
 				});
 			}
