@@ -240,4 +240,3 @@ System.Xml.XPath.XDocument.dll
 ucrtbase.dll
 
 WindowsBase.dll
-ZstdSharp.dll
