@@ -28,6 +28,7 @@ namespace HashComputer
 				Path = FolderPath,
 				Version = VersionText,
 				TaskNumber = TaskNumber,
+				StableFilesPath = StableFilePath,
 			};
 
 			IsDoneVisible = false;
@@ -100,6 +101,8 @@ namespace HashComputer
 		public int TaskNumber { get; set; } = ComputeParameters.DEFAULT_TASK_NUMBER;
 		[Notify]
 		public string OutFileName { get; set; } = ComputeParameters.DEFAULT_HASH_FILENAME;
+		[Notify]
+		public string StableFilePath { get; set; }
 
 		[Notify]
 		public ICommand ComputeHashCommand { get; set; }

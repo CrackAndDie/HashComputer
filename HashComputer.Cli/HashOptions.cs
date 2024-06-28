@@ -16,5 +16,8 @@ namespace HashComputer.Cli
 
 		[Option('o', Default = ComputeParameters.DEFAULT_HASH_FILENAME, HelpText = "The name of the hash file. (Only relative path is supported)")]
 		public string OutDir { get; set; }
+
+		[Option('s', Default = "", HelpText = "Path to the file with stable file paths")]
+		public string StableFilePath { get; set; }
 	}
 }

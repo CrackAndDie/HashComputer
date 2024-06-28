@@ -162,7 +162,7 @@
 									   Margin="60,0,0,0"/>
 						</StackPanel>
 
-						<Grid ColumnDefinitions="Auto, *, Auto, Auto, Auto">
+						<Grid ColumnDefinitions="Auto, *">
 							<NumericUpDown Value="{Binding TaskNumber, Mode=TwoWay}"
 										   Width="130"
 										   FormatString="0"
@@ -171,6 +171,19 @@
 							<TextBox Text="{Binding OutFileName, Mode=TwoWay}"
 									 TextWrapping="Wrap"
 									 Margin="10,0,0,0"
+									 Grid.Column="1"
+									 IsReadOnly="{Binding !IsInteractionEnabled}"/>
+						</Grid>
+
+						<StackPanel Orientation="Horizontal"
+									Margin="0,6,0,0">
+							<TextBlock Text="Stable file path "/>
+						</StackPanel>
+
+						<Grid ColumnDefinitions="*">
+							<TextBox Text="{Binding StableFilePath, Mode=TwoWay}"
+									 TextWrapping="Wrap"
+									 Margin="0,0,0,0"
 									 Grid.Column="1"
 									 IsReadOnly="{Binding !IsInteractionEnabled}"/>
 						</Grid>

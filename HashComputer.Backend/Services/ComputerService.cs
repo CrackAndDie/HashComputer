@@ -1,7 +1,9 @@
 ﻿using HashComputer.Backend.Entities;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Concurrent;
 using System.IO;
+using System.Reflection.Metadata;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -23,7 +25,7 @@ namespace HashComputer.Backend.Services
 				var computedHashJson = await ComputeHashPure(parameters, onProgressChanged, cancellationToken);
 
 				string fileName = parameters.HashFileName ?? ComputeParameters.DEFAULT_HASH_FILENAME;
-				string filePath = $"{parameters.Path.Trim('/')}/{fileName}.json";
+				string filePath = $"{parameters.Path.Trim('/').Trim('\\')}/{fileName}.json";
 
 				string diffText = string.Empty;
 				if (File.Exists(filePath))
@@ -62,8 +64,24 @@ namespace HashComputer.Backend.Services
 		{
 			parameters.Path = parameters.Path.Replace("\\", "/");
 
+			// TODO: cringe - rewrite
+			string localStableFile = SearchForStableFile(parameters.Path);
+			List<string> stableFiles = new List<string>();
+			if (!string.IsNullOrWhiteSpace(parameters.StableFilesPath) && File.Exists(parameters.StableFilesPath))
+			{
+				var lines = File.ReadAllText(parameters.StableFilesPath).Split(Environment.NewLine).Select(x => x.Trim());
+				lines = lines.Where(x => !string.IsNullOrWhiteSpace(x) && !x.StartsWith('#')); // skip empty and comments
+				stableFiles.AddRange(lines);
+			}
+			else if (!string.IsNullOrWhiteSpace(localStableFile) && File.Exists(localStableFile))
+			{
+				var lines = File.ReadAllText(localStableFile).Split(Environment.NewLine).Select(x => x.Trim());
+				lines = lines.Where(x => !string.IsNullOrWhiteSpace(x) && !x.StartsWith('#')); // skip empty and comments
+				stableFiles.AddRange(lines);
+			}
+
 			int taskNumber = parameters.TaskNumber <= 0 ? ComputeParameters.DEFAULT_TASK_NUMBER : parameters.TaskNumber;
-			var data = await GetFileHashMappings(parameters.Path, taskNumber, onProgressChanged, cancellationToken);
+			var data = await GetFileHashMappings(parameters.Path, taskNumber, stableFiles, onProgressChanged, cancellationToken);
 
 			ComputedHashJson computedHashJson = new ComputedHashJson()
 			{
@@ -83,6 +101,23 @@ namespace HashComputer.Backend.Services
 		{
 			//return Directory.GetFiles(folderPath, "*", SearchOption.AllDirectories);
 			return Directory.EnumerateFiles(folderPath, "*", SearchOption.AllDirectories);
+		}
+
+		private string SearchForStableFile(string folderPath)
+		{
+			string dir = folderPath;
+			bool found = false;
+			while (!string.IsNullOrWhiteSpace(dir) && Directory.Exists(dir) && !found)
+			{
+				dir = dir.Trim('/').Trim('\\');
+				string filePath = $"{dir}/{ComputeParameters.DEFAULT_STABLE_FILENAME}.txt";
+				if (File.Exists(filePath))
+				{
+					return filePath;
+				}
+				dir = Directory.GetParent(dir.EndsWith("/") ? dir : string.Concat(dir, "/"))?.Parent?.FullName;
+			}
+			return string.Empty;
 		}
 
 		/// <summary>
@@ -125,7 +160,7 @@ namespace HashComputer.Backend.Services
 		/// <param name="folderPath">Path to the folder with files</param>
 		/// <param name="onProgressChanged">Called when progress changed</param>
 		/// <returns>Mappings</returns>
-		private async Task<(Dictionary<string, string>, ulong)> GetFileHashMappings(string folderPath, int taskNumber, Action<ProgressChangedArgs> onProgressChanged = null, CancellationToken cancellationToken = default)
+		private async Task<(Dictionary<string, string>, ulong)> GetFileHashMappings(string folderPath, int taskNumber, List<string> stableFiles, Action<ProgressChangedArgs> onProgressChanged = null, CancellationToken cancellationToken = default)
 		{
 			ulong totalSize = 0;
 			Dictionary<string, string> result = new Dictionary<string, string>();
@@ -172,8 +207,18 @@ namespace HashComputer.Backend.Services
 								Message = lowerName,
 							});
 						}
+
+						string fileHash;
+						// if it is a stable file
+						if (stableFiles.Contains(lowerName))
+						{
+							fileHash = "--stable--";
+						}
+						else
+						{
+							fileHash = await GetFileHash(normalized, cancellationToken);
+						}
 						
-						string fileHash = await GetFileHash(normalized, cancellationToken);
 						var fileSize = new System.IO.FileInfo(normalized).Length;
 
 						lock (resultLock)

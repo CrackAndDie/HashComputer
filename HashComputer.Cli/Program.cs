@@ -41,6 +41,7 @@ namespace HashComputer.Cli
 					Version = options.Version,
 					TaskNumber = options.TaskAmount,
 					HashFileName = options.OutDir,
+					StableFilesPath = options.StableFilePath,
 				},
 				OnProgressChanged,
 				_currentCancellationToken.Token

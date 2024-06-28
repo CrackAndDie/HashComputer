@@ -6,6 +6,7 @@
 	public class ComputeParameters
 	{
 		public const string DEFAULT_HASH_FILENAME = "computed_hash";
+		public const string DEFAULT_STABLE_FILENAME = "computed_stables"; // not really computed but this is for placing near hash
 		public const string DEFAULT_VERSION = "1.0.0";
 		public const int DEFAULT_TASK_NUMBER = 4;
 
@@ -26,5 +27,10 @@
 		/// Task amount used to calc hash
 		/// </summary>
 		public int TaskNumber { get; set; }
+
+		/// <summary>
+		/// Path to the stable files
+		/// </summary>
+		public string StableFilesPath { get; set; }
 	}
 }
