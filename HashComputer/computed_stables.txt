@@ -42,7 +42,6 @@ api-ms-win-crt-stdio-l1-1-0.dll
 api-ms-win-crt-string-l1-1-0.dll
 api-ms-win-crt-time-l1-1-0.dll
 api-ms-win-crt-utility-l1-1-0.dll
-av_libglesv2.dll
 
 clretwrc.dll
 clrjit.dll
@@ -61,7 +60,7 @@ Microsoft.VisualBasic.Core.dll
 Microsoft.VisualBasic.dll
 Microsoft.Win32.Primitives.dll
 Microsoft.Win32.Registry.dll
-Microsoft.Win32.SystemEvents.dll
+
 mscordaccore_amd64_amd64_6.0.2623.60508.dll
 mscordaccore.dll
 mscordbi.dll
@@ -72,6 +71,7 @@ netstandard.dll
 
 System.AppContext.dll
 System.Buffers.dll
+System.CodeDom.dll
 System.Collections.Concurrent.dll
 System.Collections.dll
 System.Collections.Immutable.dll
@@ -101,7 +101,7 @@ System.Diagnostics.Tools.dll
 System.Diagnostics.TraceSource.dll
 System.Diagnostics.Tracing.dll
 System.dll
-System.Drawing.Common.dll
+
 System.Drawing.dll
 System.Drawing.Primitives.dll
 System.Dynamic.Runtime.dll
@@ -130,6 +130,7 @@ System.Linq.dll
 System.Linq.Expressions.dll
 System.Linq.Parallel.dll
 System.Linq.Queryable.dll
+
 System.Memory.dll
 System.Net.dll
 System.Net.Http.dll
@@ -194,7 +195,7 @@ System.Security.Cryptography.Csp.dll
 System.Security.Cryptography.Encoding.dll
 System.Security.Cryptography.OpenSsl.dll
 System.Security.Cryptography.Primitives.dll
-System.Security.Cryptography.ProtectedData.dll
+
 System.Security.Cryptography.X509Certificates.dll
 System.Security.dll
 System.Security.Permissions.dll
@@ -225,7 +226,7 @@ System.ValueTuple.dll
 System.Web.dll
 System.Web.HttpUtility.dll
 System.Windows.dll
-System.Windows.Extensions.dll
+
 System.Xml.dll
 System.Xml.Linq.dll
 System.Xml.ReaderWriter.dll
@@ -237,4 +238,6 @@ System.Xml.XPath.dll
 System.Xml.XPath.XDocument.dll
 
 ucrtbase.dll
+
 WindowsBase.dll
+ZstdSharp.dll
