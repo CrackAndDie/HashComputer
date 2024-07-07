@@ -19,5 +19,8 @@ namespace HashComputer.Cli
 
 		[Option('s', Default = "", HelpText = "Path to the file with stable file paths")]
 		public string StableFilePath { get; set; }
-	}
+
+        [Option('m', Default = false, HelpText = "Almost fully mute hash computer")]
+        public bool MuteHashComputer { get; set; }
+    }
 }

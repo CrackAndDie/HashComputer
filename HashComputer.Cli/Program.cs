@@ -21,12 +21,14 @@ namespace HashComputer.Cli
 
 		private static Task RunHasher(HashOptions options)
 		{
-			return RunHasherInternal(options);
+            _currentOptions = options;
+            return RunHasherInternal(options);
 		}
 
 		private async static Task RunHasherInternal(HashOptions options)
 		{
-			Console.WriteLine("Begin computing hash...");
+			if (!options.MuteHashComputer)
+				Console.WriteLine("Begin computing hash...");
 
 			_startCursorPos = Console.GetCursorPosition();
 
@@ -51,18 +53,23 @@ namespace HashComputer.Cli
 
 			if (result.Item1 && !string.IsNullOrWhiteSpace(result.Item2))
 			{
-				Console.WriteLine("There was already a hash file. Here are the files that changed or not presented yet:\n");
+                if (!options.MuteHashComputer)
+                    Console.WriteLine("There was already a hash file. Here are the files that changed or not presented yet:\n");
 			}
-			Console.WriteLine(result.Item2);
+            if (!options.MuteHashComputer)
+                Console.WriteLine(result.Item2);
 		}
 
 		private static void OnProgressChanged(ProgressChangedArgs args)
 		{
-			UpdateTextOnLine(0, args.Progress.ToString() + "%");
-			if (args.ThreadNumber > 0)
+            if (!_currentOptions.MuteHashComputer)
 			{
-				UpdateTextOnLine(args.ThreadNumber, $"Task {args.ThreadNumber}: {args.Message}");
-			}
+                UpdateTextOnLine(0, args.Progress.ToString() + "%");
+                if (args.ThreadNumber > 0)
+                {
+                    UpdateTextOnLine(args.ThreadNumber, $"Task {args.ThreadNumber}: {args.Message}");
+                }
+            }
 		}
 
 		private static void UpdateTextOnLine(int lineNumber, string text)
@@ -88,16 +95,20 @@ namespace HashComputer.Cli
 
 		private static void OnExit(bool properly)
 		{
-			// + 1 is for percents
-			for (int i = 0; i < _currentTaskAmount + 1; ++i)
+            if (!_currentOptions.MuteHashComputer)
 			{
-				Console.SetCursorPosition(_startCursorPos.Item1, _startCursorPos.Item2 + i);
-				Console.Write(new String(' ', Console.BufferWidth));
-			}
-			Console.SetCursorPosition(_startCursorPos.Item1, _startCursorPos.Item2);
-			Console.WriteLine(properly ? "Done..." : "Error...");
+                // + 1 is for percents
+                for (int i = 0; i < _currentTaskAmount + 1; ++i)
+                {
+                    Console.SetCursorPosition(_startCursorPos.Item1, _startCursorPos.Item2 + i);
+                    Console.Write(new String(' ', Console.BufferWidth));
+                }
+                Console.SetCursorPosition(_startCursorPos.Item1, _startCursorPos.Item2);
+            }
+			Console.WriteLine(properly ? "Done computing hash..." : "Error while computing hash...");
 		}
 
+		private static HashOptions _currentOptions;
 		private static int _currentTaskAmount = ComputeParameters.DEFAULT_TASK_NUMBER;
 		private static CancellationTokenSource _currentCancellationToken;
 		private static (int, int) _startCursorPos;
