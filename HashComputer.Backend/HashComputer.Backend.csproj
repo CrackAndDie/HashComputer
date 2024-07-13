@@ -1,9 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net6.0</TargetFramework>
+		<TargetFrameworks>net6.0;net8.0</TargetFrameworks>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<AssemblyName>HashComputer</AssemblyName>
+        <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
 
 		<PackageId>HashComputer</PackageId>
 		<Authors>crackanddie</Authors>
@@ -25,6 +26,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+		<PackageReference Include="Newtonsoft.Json" />
 	</ItemGroup>
 </Project>
