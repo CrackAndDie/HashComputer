@@ -28,9 +28,10 @@ namespace HashComputer.Cli
 		private async static Task RunHasherInternal(HashOptions options)
 		{
 			if (!options.MuteHashComputer)
-				Console.WriteLine("Begin computing hash...");
-
-			_startCursorPos = Console.GetCursorPosition();
+			{
+                Console.WriteLine("Begin computing hash...");
+                _startCursorPos = Console.GetCursorPosition();
+            }
 
 			var computerService = new ComputerService();
 			_currentCancellationToken = new CancellationTokenSource();
@@ -104,8 +105,8 @@ namespace HashComputer.Cli
                     Console.Write(new String(' ', Console.BufferWidth));
                 }
                 Console.SetCursorPosition(_startCursorPos.Item1, _startCursorPos.Item2);
+				Console.WriteLine(properly ? "Done computing hash..." : "Error while computing hash...");
             }
-			Console.WriteLine(properly ? "Done computing hash..." : "Error while computing hash...");
 		}
 
 		private static HashOptions _currentOptions;
