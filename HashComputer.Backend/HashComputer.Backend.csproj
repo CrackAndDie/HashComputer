@@ -12,7 +12,7 @@
 		<PackageDescription>A backend for generating hash for files</PackageDescription>
 		<Copyright>Copyright © 2024</Copyright>
 		<PackageTags>Hash SHA512 Files</PackageTags>
-		<PackageVersion>1.0.11</PackageVersion>
+		<PackageVersion>1.0.12</PackageVersion>
 		<PackageProjectUrl>https://github.com/CrackAndDie/HashComputer</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/CrackAndDie/HashComputer</RepositoryUrl>
 		<PackageIconUrl>https://raw.githubusercontent.com/CADindustries/container/main/logos/hasher.png</PackageIconUrl>
@@ -23,9 +23,5 @@
 	<ItemGroup>
 		<None Include="NUGET_README.md" Pack="true" PackagePath="\" />
 		<None Include="NUGET_LICENSE.txt" Pack="true" PackagePath="\" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<PackageReference Include="Newtonsoft.Json" />
 	</ItemGroup>
 </Project>

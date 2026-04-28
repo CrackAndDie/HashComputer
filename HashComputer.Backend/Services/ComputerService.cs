@@ -1,11 +1,9 @@
 ﻿using HashComputer.Backend.Entities;
-using Newtonsoft.Json;
-using System;
 using System.Collections.Concurrent;
-using System.IO;
-using System.Reflection.Metadata;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace HashComputer.Backend.Services
 {
@@ -25,12 +23,12 @@ namespace HashComputer.Backend.Services
 				var computedHashJson = await ComputeHashPure(parameters, onProgressChanged, cancellationToken);
 
 				string fileName = parameters.HashFileName ?? ComputeParameters.DEFAULT_HASH_FILENAME;
-				string filePath = $"{parameters.Path.Trim('/').Trim('\\')}/{fileName}.json";
+				string filePath = $"{parameters.Path.TrimEnd('/').TrimEnd('\\')}/{fileName}.json";
 
 				string diffText = string.Empty;
 				if (File.Exists(filePath))
 				{
-					var prevJson = JsonConvert.DeserializeObject<ComputedHashJson>(await File.ReadAllTextAsync(filePath));
+					var prevJson = JsonSerializer.Deserialize<ComputedHashJson>(await File.ReadAllTextAsync(filePath));
 					StringBuilder sb = new StringBuilder();
 					foreach (var pair in computedHashJson.ComputedHashes)
 					{
@@ -41,7 +39,7 @@ namespace HashComputer.Backend.Services
 					diffText = sb.ToString();
 				}
 
-				string data = JsonConvert.SerializeObject(computedHashJson);
+				string data = JsonSerializer.Serialize(computedHashJson);
 				await File.WriteAllTextAsync(filePath, data, cancellationToken);
 
 				onProgressChanged?.Invoke(new ProgressChangedArgs()
@@ -109,7 +107,7 @@ namespace HashComputer.Backend.Services
 			bool found = false;
 			while (!string.IsNullOrWhiteSpace(dir) && Directory.Exists(dir) && !found)
 			{
-				dir = dir.Trim('/').Trim('\\');
+				dir = dir.TrimEnd('/').TrimEnd('\\');
 				string filePath = $"{dir}/{ComputeParameters.DEFAULT_STABLE_FILENAME}.txt";
 				if (File.Exists(filePath))
 				{

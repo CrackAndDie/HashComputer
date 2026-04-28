@@ -40,8 +40,6 @@
 		</PackageReference>
 		<PackageReference Include="Hypocrite.Services.Avalonia" />
 		<PackageReference Include="log4net" />
-
-		<PackageReference Include="Newtonsoft.Json" />
 	</ItemGroup>
 
 	<ItemGroup>
