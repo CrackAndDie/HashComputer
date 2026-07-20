@@ -15,7 +15,7 @@
 		<PackageVersion>1.0.12</PackageVersion>
 		<PackageProjectUrl>https://github.com/CrackAndDie/HashComputer</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/CrackAndDie/HashComputer</RepositoryUrl>
-		<PackageIconUrl>https://raw.githubusercontent.com/CADindustries/container/main/logos/hasher.png</PackageIconUrl>
+		<PackageIconUrl>https://raw.githubusercontent.com/CADindustries/container/main/logos/hasher2.png</PackageIconUrl>
 		<PackageReadmeFile>NUGET_README.md</PackageReadmeFile>
 		<PackageLicenseFile>NUGET_LICENSE.txt</PackageLicenseFile>
 	</PropertyGroup>
